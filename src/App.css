@@ -1,0 +1,47 @@
+.card {
+	width: 300px;
+	height: 400px;
+	background-color: var(--background-1);
+	border-radius: 30px;
+	padding: 30px;
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+	justify-content: space-between;
+	width: 280px;
+}
+
+.form-item {
+	display: flex;
+	align-items: center;
+}
+
+.form-item label {
+	width: 100px;
+	text-align: right;
+}
+
+.form-item input {
+	margin: 5px;
+	flex: 1;
+}
+
+.submit {
+	margin: 5px;
+}
+
+.output {
+	background-color: var(--background-2);
+	width: 270px;
+	flex: 1;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+}
