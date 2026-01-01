@@ -1,11 +1,6 @@
 import { useRef, useState } from 'react';
 import './App.css';
-import { treaty } from '@elysiajs/eden';
-import type { App } from 'server';
-
-// 从环境变量读取后端 API URL，支持前后端分离部署
-const API_URL = import.meta.env?.VITE_API_URL ?? window.location.origin;
-const app = treaty<App>(API_URL);
+import { getPlayerUUIDByName, getPlayerStatusOnHypixel } from './utils/uuid';
 
 export function App() {
 	const [apiKey, setAPIKey] = useState<string>('');
@@ -34,34 +29,31 @@ export function App() {
 
 	async function query() {
 		console.log(uuid);
-		const result = await app.online.get({
-			query: {
-				key: apiKey,
-				uuid: uuidRef.current!
+		try {
+			const result = await getPlayerStatusOnHypixel(apiKey, uuidRef.current!);
+
+			setThisQuery({
+				success: true,
+				result,
+				time: new Date().toLocaleTimeString()
+			});
+
+			if (result.online && (alwaysNotify || !lastOnline.current)) {
+				new Notification(`${playerName} is online`, {
+					body: [
+						`game type: ${result.gameType}`,
+						`mode: ${result.mode}`
+					].join('\n')
+				});
 			}
-		});
-		if (result.error) {
-			return setThisQuery({
+			lastOnline.current = result.online;
+		} catch (error) {
+			setThisQuery({
 				success: false,
-				message: `error: ${result.error.value.message}`,
+				message: error instanceof Error ? error.message : String(error),
 				time: new Date().toLocaleTimeString()
 			});
 		}
-		setThisQuery({
-			success: true,
-			result: result.data.session,
-			time: new Date().toLocaleTimeString()
-		});
-
-		if (result.data.session.online && (alwaysNotify || !lastOnline.current)) {
-			new Notification(`${playerName} is online`, {
-				body: [
-					`game type: ${result.data.session.gameType}`,
-					`mode: ${result.data.session.mode}`
-				].join('\n')
-			});
-		}
-		lastOnline.current = result.data.session.online;
 	}
 
 	return (
@@ -114,22 +106,23 @@ export function App() {
 								if (result !== 'granted') return;
 
 								setStatus('loading');
-								app.uuid
-									.get({ query: { playerName } })
-									.then((val) => {
-										if (val.error) {
-											setStatus('failed');
-											if (val.status === 404) return setReason(`player not found`);
-											setReason(`http status: ${val.error.status}`);
-											return;
-										}
-										setUUID(val.data.uuid);
-										uuidRef.current = val.data.uuid;
-										setStatus('running');
-										intervalID.current = setInterval(() => query(), 15 * 1000);
-										query();
-									})
-									.catch((e) => setReason(e));
+
+								try {
+									// 使用 PlayerDB.co API 获取 UUID
+									const fetchedUUID = await getPlayerUUIDByName(playerName);
+									setUUID(fetchedUUID);
+									uuidRef.current = fetchedUUID;
+									setStatus('running');
+									intervalID.current = setInterval(() => query(), 15 * 1000);
+									query();
+								} catch (e) {
+									setStatus('failed');
+									if (e instanceof Error && e.message === 'Player not found') {
+										setReason('player not found');
+									} else {
+										setReason(e instanceof Error ? e.message : String(e));
+									}
+								}
 							} else {
 								setStatus('idle');
 								setReason(null);

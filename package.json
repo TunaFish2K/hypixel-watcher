@@ -1,24 +1,19 @@
 {
-  "name": "bun-react-template",
+  "name": "hypixel-watcher",
   "version": "0.1.0",
   "private": true,
-  "module": "./src/server.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --hot frontend/dev.ts",
-    "build": "bun build ./src/index.html --outdir ./dist --minify",
-    "build:backend": "bun build ./server/index.ts --target bun --outdir ./dist/server"
+    "dev": "bun --hot src/index.html",
+    "build": "bun build ./src/index.html --outdir ./dist --minify"
   },
   "dependencies": {
-    "@elysiajs/eden": "^1.4.6",
-    "elysia": "^1.4.19",
     "react": "^19",
     "react-dom": "^19"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "wrangler": "^4.54.0"
+    "@types/react-dom": "^19"
   }
 }

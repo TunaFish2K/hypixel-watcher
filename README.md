@@ -1,15 +1,24 @@
 # Hypixel Watcher
 
-一个用于监控 Hypixel 玩家在线状态的应用。
+一个用于监控 Hypixel 玩家在线状态的纯前端应用。
 
 ## 📦 项目架构
 
-本项目采用前后端分离架构：
+本项目是**纯前端应用**：
 
-- **前端**: React SPA，部署到 Cloudflare Pages
-- **后端**: Elysia.js API，部署到 Cloudflare Workers
-- **开发环境**: 前后端合并运行（单服务器）
-- **生产环境**: 前后端独立部署
+- **前端**: React SPA
+- **API**: 直接调用公共 API（PlayerDB.co + Hypixel API）
+- **部署**: 仅需部署到 Cloudflare Pages（或任何静态托管）
+- **无后端**: 不需要 Cloudflare Workers 或其他后端服务
+
+### 架构特点
+
+- ✨ **零后端成本**: 无需服务器或 Serverless 函数
+- 🚀 **极致简化**: 纯静态文件，部署简单
+- 🌍 **CORS 友好**: 所有 API 支持跨域访问
+- 📡 **API 直连**:
+  - [PlayerDB.co API](https://playerdb.co) - 获取玩家 UUID
+  - [Hypixel API](https://api.hypixel.net) - 查询玩家状态
 
 ---
 
@@ -21,77 +30,36 @@
 bun install
 ```
 
-### 2. 配置环境变量
-
-复制环境变量示例文件：
-
-```bash
-cp .env.example .env
-```
-
-`.env` 文件内容（开发环境默认配置）：
-
-```env
-VITE_API_URL=http://localhost:5173
-```
-
-> 注意：开发环境下前后端运行在同一服务器 (localhost:5173)，所以 API_URL 指向本地。
-
-### 3. 启动开发服务器
+### 2. 启动开发服务器
 
 ```bash
 bun run dev
 ```
 
-这将启动包含前后端的开发服务器，访问 http://localhost:5173
+访问 http://localhost:5173
 
 ---
 
-## ☁️ Cloudflare 部署
+## ☁️ 部署到 Cloudflare Pages
 
-### 第一步：部署后端 API (Workers)
+### 方法 1: Git 自动部署（推荐）
 
-#### 1.1 安装 Wrangler
-
-```bash
-bun add -D wrangler
-```
-
-#### 1.2 登录 Cloudflare
+#### 1.1 推送代码到 Git
 
 ```bash
-bunx wrangler login
+git add .
+git commit -m "Deploy Hypixel Watcher"
+git push
 ```
 
-#### 1.3 部署 Worker
-
-```bash
-bunx wrangler deploy
-```
-
-部署成功后，你会得到一个 Worker URL，例如：
-```
-https://hypixel-watcher-api.your-subdomain.workers.dev
-```
-
-**记住这个 URL，稍后配置前端时需要用到！**
-
----
-
-### 第二步：部署前端 (Cloudflare Pages)
-
-#### 2.1 在 Cloudflare Dashboard 创建 Pages 项目
+#### 1.2 在 Cloudflare Dashboard 创建 Pages 项目
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 进入 **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
 3. 选择你的 GitHub/GitLab 仓库
 4. 配置构建设置
 
-#### 2.2 配置构建参数
-
-**重要：Cloudflare Pages 需要使用 Bun 构建！**
-
-在 Cloudflare Pages 项目设置中配置：
+#### 1.3 配置构建参数
 
 | 配置项 | 值 |
 |--------|-----|
@@ -99,148 +67,138 @@ https://hypixel-watcher-api.your-subdomain.workers.dev
 | **Build output directory** | `dist` |
 | **Root directory** | `/` (留空或填根目录) |
 
-#### 2.3 配置环境变量
+#### 1.4 部署
 
-在 Cloudflare Pages 项目的 **Settings** → **Environment variables** 中添加：
+点击 **Save and Deploy**，Cloudflare 会自动构建并部署你的应用！
 
-| 变量名 | 值 | 说明 |
-|--------|-----|------|
-| `VITE_API_URL` | `https://hypixel-watcher-api.your-subdomain.workers.dev` | 你的 Worker API 地址 |
-
-> ⚠️ 重要：将 URL 替换为你在第一步部署的实际 Worker URL！
-
-#### 2.4 触发部署
-
-配置完成后：
-1. 点击 **Save** 保存环境变量
-2. 前往 **Deployments** 页面
-3. 点击 **Retry deployment** 重新构建（使用新的环境变量）
-
-部署成功后，你会得到一个 Pages URL，例如：
+部署成功后，你会得到一个 URL，例如：
 ```
 https://hypixel-watcher.pages.dev
 ```
 
 ---
 
-## 🔧 开发 vs 生产环境对比
+### 方法 2: 手动部署
 
-### 开发环境
+#### 2.1 本地构建
 
 ```bash
-bun run dev
+bun run build
 ```
 
-- 前后端运行在同一服务器 (localhost:5173)
-- `VITE_API_URL=http://localhost:5173`
-- 热重载 (HMR) 支持
-- 自动加载 `.env` 文件
+这会在 `dist/` 目录生成静态文件。
 
-### 生产环境
+#### 2.2 上传到 Cloudflare Pages
 
-**前端 (Cloudflare Pages)**
-- 独立部署，静态资源托管
-- 通过 `VITE_API_URL` 环境变量连接后端
-- 构建时注入环境变量
+使用 Wrangler CLI：
 
-**后端 (Cloudflare Workers)**
-- 独立部署，边缘计算
-- 纯 API 服务，无静态资源
+```bash
+bunx wrangler pages deploy dist --project-name hypixel-watcher
+```
+
+或直接在 Cloudflare Dashboard 上传 `dist` 文件夹。
+
+---
+
+## 🌟 其他部署选项
+
+由于这是纯静态前端应用，你可以部署到任何静态托管服务：
+
+- **Cloudflare Pages** (推荐，免费 + CDN)
+- **Vercel**
+- **Netlify**
+- **GitHub Pages**
+- **任何支持静态文件的服务器**
+
+只需运行 `bun run build` 然后上传 `dist/` 目录即可！
+
+---
+
+## 🔧 开发说明
+
+### 项目结构
+
+```
+hypixel-watcher/
+├── src/
+│   ├── App.tsx              # 主应用组件
+│   ├── utils/
+│   │   └── uuid.ts          # API 调用函数（PlayerDB + Hypixel）
+│   ├── index.html           # HTML 入口
+│   ├── index.tsx            # React 入口
+│   ├── index.css            # 全局样式
+│   └── App.css              # 应用样式
+├── dist/                    # 构建输出（自动生成）
+└── package.json
+```
+
+### 极简开发流程
+
+感谢 Bun 的强大功能，开发超级简单喵～
+
+**开发**：
+```bash
+bun --hot src/index.html
+```
+直接运行 HTML 文件，支持热重载！
+
+**构建**：
+```bash
+bun build src/index.html --outdir dist --minify
+```
+一条命令搞定构建！
+
+### 使用的 API
+
+#### PlayerDB.co API
+```
+GET https://playerdb.co/api/player/minecraft/{playerName}
+```
+用于获取玩家的 UUID。
+
+#### Hypixel API
+```
+GET https://api.hypixel.net/status?key={apiKey}&uuid={uuid}
+```
+用于查询玩家在线状态。需要 [Hypixel API Key](https://developer.hypixel.net/)。
+
+---
+
+## 🎯 使用方法
+
+1. 访问部署的应用
+2. 输入你的 **Hypixel API Key**（[获取方式](https://developer.hypixel.net/)）
+3. 输入要监控的 **玩家名**
+4. 选择通知模式（始终通知 / 仅上线时通知）
+5. 点击 **Watch** 开始监控
+6. 应用会每 15 秒检查一次玩家状态，并在浏览器通知你
 
 ---
 
 ## 📝 常见问题
 
-### Q1: 前端构建失败，提示找不到模块
+### Q1: 为什么需要 API Key？
 
-**原因**: Cloudflare Pages 默认使用 Node.js，但项目需要 Bun。
+Hypixel API 需要 API Key 才能查询玩家状态。你可以：
+1. 在 Hypixel 服务器内执行 `/api new`
+2. 或访问 [Hypixel Developer Dashboard](https://developer.hypixel.net/)
 
-**解决**: 在构建命令中先安装 Bun：
-```bash
-curl -fsSL https://bun.sh/install | bash && export PATH="$HOME/.bun/bin:$PATH" && bun install && bun run build
-```
+### Q2: 这个应用安全吗？API Key 会被泄露吗？
 
-### Q2: 前端部署成功但 API 调用失败
+- ✅ API Key 仅存储在你的浏览器本地
+- ✅ 不会发送到任何第三方服务器（除了 Hypixel API 本身）
+- ✅ 完全开源，可以自己部署
 
-**可能原因**:
-1. `VITE_API_URL` 环境变量未正确配置
-2. Worker 未部署或 URL 错误
-3. CORS 问题
+### Q3: 支持哪些浏览器？
 
-**检查步骤**:
-1. 确认 Worker 已成功部署：`bunx wrangler deployments list`
-2. 检查 Pages 环境变量中的 `VITE_API_URL` 是否正确
-3. 重新部署 Pages 以应用新环境变量
+需要支持以下特性的现代浏览器：
+- Web Crypto API（用于 UUID 计算）
+- Notification API（用于浏览器通知）
+- 推荐：Chrome、Firefox、Edge、Safari（最新版本）
 
-### Q3: 如何查看 Worker 日志？
+### Q4: 可以同时监控多个玩家吗？
 
-```bash
-bunx wrangler tail
-```
-
-### Q4: 如何本地测试 Worker？
-
-```bash
-bunx wrangler dev server/worker.ts
-```
-
----
-
-## 🎯 完整部署流程总结
-
-```bash
-# 1. 部署后端
-bunx wrangler deploy
-# 记录 Worker URL: https://your-api.workers.dev
-
-# 2. 在 Cloudflare Pages Dashboard 配置：
-#    - Build command: curl -fsSL https://bun.sh/install | bash && ...
-#    - Environment variable: VITE_API_URL=https://your-api.workers.dev
-
-# 3. 推送代码到 Git，触发 Pages 自动部署
-git add .
-git commit -m "Setup Cloudflare deployment"
-git push
-
-# 4. 访问你的 Pages URL 测试
-```
-
----
-
-## 🛠️ 更新部署
-
-### 更新后端
-
-```bash
-bunx wrangler deploy
-```
-
-### 更新前端
-
-直接推送代码到 Git，Cloudflare Pages 会自动构建部署：
-
-```bash
-git push
-```
-
-或在 Cloudflare Dashboard 手动触发重新部署。
-
----
-
-## 🌟 最佳实践
-
-1. **环境变量管理**:
-   - 本地开发使用 `.env`
-   - 生产环境在 Cloudflare Dashboard 配置
-   - 不要将 `.env` 提交到 Git（已添加到 `.gitignore`）
-
-2. **前后端版本同步**:
-   - 后端 API 变更后，确保前端类型定义同步
-   - 使用 `@elysiajs/eden` 的类型推导保证类型安全
-
-3. **域名配置** (可选):
-   - Pages: 在 Cloudflare Pages 设置自定义域名
-   - Workers: 在 `wrangler.toml` 中配置 routes
+当前版本仅支持监控一个玩家。如果需要监控多个玩家，可以打开多个浏览器标签页。
 
 ---
 
