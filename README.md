@@ -42,12 +42,12 @@ bun run dev
 
 ## ☁️ 部署到 Cloudflare Pages
 
-> ⚠️ **重要**:
-> - 这是**纯静态项目**，选择 **Pages** 而不是 Workers
-> - `wrangler.toml` 只配置 Pages 输出目录，不包含 Workers 配置
-> - Cloudflare Pages 会自动处理静态文件托管
+> ⚠️ **推荐方式：Git 自动部署**
+> - 使用 GitHub/GitLab 集成，无需手动配置 Token
+> - Cloudflare 通过 OAuth 自动授权
+> - 推送代码即可自动构建和部署
 
-### 方法 1: Git 自动部署（推荐）
+### 方法 1: Git 自动部署（强烈推荐）
 
 #### 1.1 推送代码到 Git
 
@@ -62,33 +62,35 @@ git push
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 进入 **Workers & Pages**
 3. 点击 **Create application**
-4. 选择 **Pages** 标签页（不是 Workers！）
-5. 点击 **Connect to Git**
-6. 选择你的 GitHub/GitLab 仓库
-7. 配置构建设置
+4. 选择 **Pages** 标签页
+5. 点击 **Connect to Git** （重要！不是 "Direct Upload"）
+6. 授权 Cloudflare 访问你的 GitHub/GitLab
+7. 选择 `hypixel-watcher` 仓库
+8. 配置构建设置
 
 #### 1.3 配置构建参数
 
 **重要提示**：
-- ✅ 只配置 **Build command** 和 **Build output directory**
-- ❌ **不要配置** Deploy command（留空，让 wrangler.toml 自动处理）
+- ✅ Framework preset 选择 **None**
+- ✅ 不需要 `wrangler.toml` 文件
+- ✅ 不需要配置 API Token（使用 Git OAuth）
 
 | 配置项 | 值 |
 |--------|-----|
-| **Framework preset** | None（选择无框架）|
+| **Framework preset** | None |
 | **Build command** | `curl -fsSL https://bun.sh/install \| bash && export PATH="$HOME/.bun/bin:$PATH" && bun install && bun run build` |
 | **Build output directory** | `dist` |
-| **Root directory** | `/` (留空) |
-| **Deploy command** | (留空，wrangler.toml 会自动指定) |
 
 #### 1.4 部署
 
 点击 **Save and Deploy**，Cloudflare 会自动构建并部署你的应用！
 
-> 💡 **常见错误排查**:
-> - ❌ "Worker name undefined" → 确保 wrangler.toml 只有 `name` 和 `pages_build_output_dir`
-> - ❌ "Must specify a directory" → 确保 wrangler.toml 包含 `pages_build_output_dir = "dist"`
-> - ✅ 正确的 wrangler.toml 应该只有 2-3 行配置
+> 💡 **为什么推荐 Git 部署？**
+> - ✅ 无需配置 API Token
+> - ✅ 无需 wrangler.toml
+> - ✅ 推送代码自动触发构建
+> - ✅ 自动预览每个 Pull Request
+> - ✅ 回滚到任意历史版本
 
 部署成功后，你会得到一个 URL，例如：
 ```
