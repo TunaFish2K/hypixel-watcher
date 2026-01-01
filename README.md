@@ -42,14 +42,11 @@ bun run dev
 
 ## ☁️ 部署到 Cloudflare Pages
 
-> ⚠️ **推荐方式：Git 自动部署**
-> - 使用 GitHub/GitLab 集成，无需手动配置 Token
-> - Cloudflare 通过 OAuth 自动授权
-> - 推送代码即可自动构建和部署
+> ⚠️ **重要**: 选择 **Pages**，不是 Workers！
 
-### 方法 1: Git 自动部署（强烈推荐）
+### Git 自动部署（推荐）
 
-#### 1.1 推送代码到 Git
+#### 1. 推送代码到 Git
 
 ```bash
 git add .
@@ -57,23 +54,16 @@ git commit -m "Deploy Hypixel Watcher"
 git push
 ```
 
-#### 1.2 在 Cloudflare Dashboard 创建 Pages 项目
+#### 2. 在 Cloudflare Dashboard 创建 Pages 项目
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 进入 **Workers & Pages**
 3. 点击 **Create application**
-4. 选择 **Pages** 标签页
-5. 点击 **Connect to Git** （重要！不是 "Direct Upload"）
-6. 授权 Cloudflare 访问你的 GitHub/GitLab
-7. 选择 `hypixel-watcher` 仓库
-8. 配置构建设置
+4. **选择 Pages 标签页**（不是 Workers 标签页！）
+5. 点击 **Connect to Git**
+6. 授权并选择你的仓库
 
-#### 1.3 配置构建参数
-
-**重要提示**：
-- ✅ Framework preset 选择 **None**
-- ✅ 不需要 `wrangler.toml` 文件
-- ✅ 不需要配置 API Token（使用 Git OAuth）
+#### 3. 配置构建设置
 
 | 配置项 | 值 |
 |--------|-----|
@@ -81,55 +71,36 @@ git push
 | **Build command** | `curl -fsSL https://bun.sh/install \| bash && export PATH="$HOME/.bun/bin:$PATH" && bun install && bun run build` |
 | **Build output directory** | `dist` |
 
-#### 1.4 部署
+#### 4. 部署
 
-点击 **Save and Deploy**，Cloudflare 会自动构建并部署你的应用！
+点击 **Save and Deploy**！
 
-> 💡 **为什么推荐 Git 部署？**
-> - ✅ 无需配置 API Token
-> - ✅ 无需 wrangler.toml
-> - ✅ 推送代码自动触发构建
-> - ✅ 自动预览每个 Pull Request
-> - ✅ 回滚到任意历史版本
-
-部署成功后，你会得到一个 URL，例如：
-```
-https://hypixel-watcher.pages.dev
-```
+以后每次 `git push` 都会自动触发构建和部署。
 
 ---
 
-### 方法 2: 使用 Wrangler CLI 部署
+### 手动部署（备选方案）
 
-#### 2.1 本地构建
+如果不想用 Git 集成：
 
 ```bash
+# 1. 本地构建
 bun run build
-```
 
-这会在 `dist/` 目录生成静态文件。
-
-#### 2.2 使用 Wrangler 部署到 Pages
-
-```bash
+# 2. 使用 Wrangler 部署
 bunx wrangler pages deploy dist --project-name hypixel-watcher
 ```
 
-> 注意：使用 `wrangler pages deploy`（不是 `wrangler deploy`），这样会部署为 Pages 而不是 Workers。
-
 ---
 
-## 🌟 其他部署选项
+## 🌟 其他静态托管平台
 
-由于这是纯静态前端应用，你可以部署到任何静态托管服务：
+这是纯静态应用，可以部署到任何平台：
 
-- **Cloudflare Pages** (推荐，免费 + CDN)
-- **Vercel**
-- **Netlify**
-- **GitHub Pages**
+- **Vercel**: `vercel deploy`
+- **Netlify**: 拖拽 `dist` 目录
+- **GitHub Pages**: 推送到 `gh-pages` 分支
 - **任何支持静态文件的服务器**
-
-只需运行 `bun run build` 然后上传 `dist/` 目录即可！
 
 ---
 
