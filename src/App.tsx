@@ -40,10 +40,7 @@ export function App() {
 
 			if (result.online && (alwaysNotify || !lastOnline.current)) {
 				new Notification(`${playerName} is online`, {
-					body: [
-						`game type: ${result.gameType}`,
-						`mode: ${result.mode}`
-					].join('\n')
+					body: [`game type: ${result.gameType}`, `mode: ${result.mode}`].join('\n')
 				});
 			}
 			lastOnline.current = result.online;
@@ -72,6 +69,9 @@ export function App() {
 							disabled={active}
 						></input>
 					</div>
+					<span>
+						Visit <a href="https://developer.hypixel.net">Developer Dashboard</a> for the key.
+					</span>
 					<div className="form-item">
 						<label htmlFor="player">Player Name</label>
 						<input
