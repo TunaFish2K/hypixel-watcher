@@ -44,7 +44,7 @@ bun run dev
 
 > ⚠️ **重要**:
 > - 这是**纯静态项目**，选择 **Pages** 而不是 Workers
-> - **不需要** `wrangler.toml` 配置文件
+> - `wrangler.toml` 只配置 Pages 输出目录，不包含 Workers 配置
 > - Cloudflare Pages 会自动处理静态文件托管
 
 ### 方法 1: Git 自动部署（推荐）
@@ -71,8 +71,7 @@ git push
 
 **重要提示**：
 - ✅ 只配置 **Build command** 和 **Build output directory**
-- ❌ **不要配置** Deploy command（留空即可）
-- ❌ **不要使用** wrangler.toml（纯静态项目不需要）
+- ❌ **不要配置** Deploy command（留空，让 wrangler.toml 自动处理）
 
 | 配置项 | 值 |
 |--------|-----|
@@ -80,16 +79,16 @@ git push
 | **Build command** | `curl -fsSL https://bun.sh/install \| bash && export PATH="$HOME/.bun/bin:$PATH" && bun install && bun run build` |
 | **Build output directory** | `dist` |
 | **Root directory** | `/` (留空) |
-| **Deploy command** | (留空，不填) |
+| **Deploy command** | (留空，wrangler.toml 会自动指定) |
 
 #### 1.4 部署
 
 点击 **Save and Deploy**，Cloudflare 会自动构建并部署你的应用！
 
 > 💡 **常见错误排查**:
-> - ❌ "Worker name undefined" → 说明选错了，应该选 **Pages** 不是 Workers
-> - ❌ "compatibility_date required" → 说明有 `wrangler.toml`，删除它
-> - ❌ "wrangler deploy --assets" 错误 → Deploy command 应该留空
+> - ❌ "Worker name undefined" → 确保 wrangler.toml 只有 `name` 和 `pages_build_output_dir`
+> - ❌ "Must specify a directory" → 确保 wrangler.toml 包含 `pages_build_output_dir = "dist"`
+> - ✅ 正确的 wrangler.toml 应该只有 2-3 行配置
 
 部署成功后，你会得到一个 URL，例如：
 ```

@@ -1,0 +1,5 @@
+# Cloudflare Pages 配置
+# 纯静态项目，不使用 Workers
+
+name = "hypixel-watcher"
+pages_build_output_dir = "dist"
