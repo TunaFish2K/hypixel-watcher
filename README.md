@@ -42,6 +42,11 @@ bun run dev
 
 ## ☁️ 部署到 Cloudflare Pages
 
+> ⚠️ **重要**:
+> - 这是**纯静态项目**，选择 **Pages** 而不是 Workers
+> - **不需要** `wrangler.toml` 配置文件
+> - Cloudflare Pages 会自动处理静态文件托管
+
 ### 方法 1: Git 自动部署（推荐）
 
 #### 1.1 推送代码到 Git
@@ -55,21 +60,36 @@ git push
 #### 1.2 在 Cloudflare Dashboard 创建 Pages 项目
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
-2. 进入 **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
-3. 选择你的 GitHub/GitLab 仓库
-4. 配置构建设置
+2. 进入 **Workers & Pages**
+3. 点击 **Create application**
+4. 选择 **Pages** 标签页（不是 Workers！）
+5. 点击 **Connect to Git**
+6. 选择你的 GitHub/GitLab 仓库
+7. 配置构建设置
 
 #### 1.3 配置构建参数
 
+**重要提示**：
+- ✅ 只配置 **Build command** 和 **Build output directory**
+- ❌ **不要配置** Deploy command（留空即可）
+- ❌ **不要使用** wrangler.toml（纯静态项目不需要）
+
 | 配置项 | 值 |
 |--------|-----|
+| **Framework preset** | None（选择无框架）|
 | **Build command** | `curl -fsSL https://bun.sh/install \| bash && export PATH="$HOME/.bun/bin:$PATH" && bun install && bun run build` |
 | **Build output directory** | `dist` |
-| **Root directory** | `/` (留空或填根目录) |
+| **Root directory** | `/` (留空) |
+| **Deploy command** | (留空，不填) |
 
 #### 1.4 部署
 
 点击 **Save and Deploy**，Cloudflare 会自动构建并部署你的应用！
+
+> 💡 **常见错误排查**:
+> - ❌ "Worker name undefined" → 说明选错了，应该选 **Pages** 不是 Workers
+> - ❌ "compatibility_date required" → 说明有 `wrangler.toml`，删除它
+> - ❌ "wrangler deploy --assets" 错误 → Deploy command 应该留空
 
 部署成功后，你会得到一个 URL，例如：
 ```
@@ -78,7 +98,7 @@ https://hypixel-watcher.pages.dev
 
 ---
 
-### 方法 2: 手动部署
+### 方法 2: 使用 Wrangler CLI 部署
 
 #### 2.1 本地构建
 
@@ -88,15 +108,13 @@ bun run build
 
 这会在 `dist/` 目录生成静态文件。
 
-#### 2.2 上传到 Cloudflare Pages
-
-使用 Wrangler CLI：
+#### 2.2 使用 Wrangler 部署到 Pages
 
 ```bash
 bunx wrangler pages deploy dist --project-name hypixel-watcher
 ```
 
-或直接在 Cloudflare Dashboard 上传 `dist` 文件夹。
+> 注意：使用 `wrangler pages deploy`（不是 `wrangler deploy`），这样会部署为 Pages 而不是 Workers。
 
 ---
 
