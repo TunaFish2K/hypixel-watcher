@@ -1,0 +1,8 @@
+name = "hypixel-watcher"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "dist"
+
+# 这是一个纯静态 Pages 项目
+# 不需要 Workers，只需要静态资源托管
+[assets]
+directory = "dist"
